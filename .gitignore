@@ -1,5 +1,14 @@
-# newsdata files
+# newsdata files, code to download is included
 train/
+
+# +400 MB, created by preprocessing
+input/reuters_all.pkl
+
+#working files, created by code
+work/
+
+#testing files
+ignore/
 
 ### IPythonNotebook ###
 # Temporary data
