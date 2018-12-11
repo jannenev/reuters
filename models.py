@@ -320,18 +320,19 @@ class RNNSimple(nn.Module):
 #N_LAYERS = 1
 #BIDIRECTIONAL = False
 
-
-
-
 class LSTM(nn.Module):
-    def __init__(self, input_dim, output_dim, embedding_dim, hidden_dim, n_layers=1, bidirectional=False):
+    def __init__(self, input_dim, output_dim, embedding_dim, hidden_dim,
+                n_layers, bidirectional, device):
         super(LSTM, self).__init__()
+        self.n_layers = n_layers
+        self.bidirectional=bidirectional
         self.embedding = nn.Embedding(input_dim, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, hidden_dim, num_layers=n_layers, bidirectional=bidirectional) # dropout=0.5)
         self.fc1 = nn.Linear(2*hidden_dim, 200) if bidirectional else nn.Linear(hidden_dim, 200)
         self.fc2 = nn.Linear(200, output_dim)
         self.hidden_dim = hidden_dim
-        self.bidirectional = bidirectional
+        self.device=device
+        
         
         
     def forward(self, x):
@@ -342,14 +343,14 @@ class LSTM(nn.Module):
         output = self.fc2(x)
         return output
     
-    def init_hidden(self):
-        BATCH_SIZE = 64
+    def init_hidden(self, batch_size):
         if self.bidirectional:
-            return (torch.zeros(2*n_layers, BATCH_SIZE, self.hidden_dim).to(device),
-                  torch.zeros(2*n_layers, BATCH_SIZE, self.hidden_dim).to(device))
+            return (torch.zeros(2*self.n_layers, batch_size, self.hidden_dim).to(self.device),
+                  torch.zeros(2*self.n_layers, batch_size, self.hidden_dim).to(self.device))
         else:
-            return (torch.zeros(n_layers, BATCH_SIZE, self.hidden_dim).to(device),
-                  torch.zeros(n_layers, BATCH_SIZE, self.hidden_dim).to(device))
+            return (torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(self.device),
+                  torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(self.device))
+
 
 
 #model = LSTM(INPUT_DIM, EMBEDDING_DIM, HIDDEN_DIM, N_LAYERS, BIDIRECTIONAL)
