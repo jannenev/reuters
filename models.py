@@ -275,24 +275,6 @@ class CNN2(nn.Module):
 # 14 epochs gave f1 0.84
 
 
-# # LSTM model
-
-# In[ ]:
-
-
-# model
-#INPUT_DIM = len(TEXT.vocab)
-#EMBEDDING_DIM = 50
-#HIDDEN_DIM = 250
-#OUTPUT_DIM = 126
-#N_EPOCHS = 50
-
-
-#N_LAYERS = 1
-#bidirectional = False
-
-
-
 # Simple model
 import torch.nn as nn
 
@@ -325,16 +307,31 @@ class RNNSimple(nn.Module):
 #OUTPUT_DIM = 126
 #model = RNNSimple(INPUT_DIM, EMBEDDING_DIM, HIDDEN_DIM, OUTPUT_DIM)
 
+# # LSTM model
+
+# model
+#INPUT_DIM = len(TEXT.vocab)
+#EMBEDDING_DIM = 50
+#HIDDEN_DIM = 250
+#OUTPUT_DIM = 126
+#N_EPOCHS = 50
+
+
+#N_LAYERS = 1
+#BIDIRECTIONAL = False
+
+
 
 
 class LSTM(nn.Module):
-    def __init__(self, input_dim, embedding_dim, hidden_dim):
+    def __init__(self, input_dim, output_dim, embedding_dim, hidden_dim, n_layers=1, bidirectional=False):
         super(LSTM, self).__init__()
         self.embedding = nn.Embedding(input_dim, embedding_dim)
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim, num_layers=N_LAYERS, bidirectional=bidirectional) # dropout=0.5)
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim, num_layers=n_layers, bidirectional=bidirectional) # dropout=0.5)
         self.fc1 = nn.Linear(2*hidden_dim, 200) if bidirectional else nn.Linear(hidden_dim, 200)
-        self.fc2 = nn.Linear(200, OUTPUT_DIM)
+        self.fc2 = nn.Linear(200, output_dim)
         self.hidden_dim = hidden_dim
+        self.bidirectional = bidirectional
         
         
     def forward(self, x):
@@ -346,15 +343,16 @@ class LSTM(nn.Module):
         return output
     
     def init_hidden(self):
-        if bidirectional:
-            return (torch.zeros(2*N_LAYERS, BATCH_SIZE, self.hidden_dim).to(device),
-                  torch.zeros(2*N_LAYERS, BATCH_SIZE, self.hidden_dim).to(device))
+        BATCH_SIZE = 64
+        if self.bidirectional:
+            return (torch.zeros(2*n_layers, BATCH_SIZE, self.hidden_dim).to(device),
+                  torch.zeros(2*n_layers, BATCH_SIZE, self.hidden_dim).to(device))
         else:
-            return (torch.zeros(N_LAYERS, BATCH_SIZE, self.hidden_dim).to(device),
-                  torch.zeros(N_LAYERS, BATCH_SIZE, self.hidden_dim).to(device))
+            return (torch.zeros(n_layers, BATCH_SIZE, self.hidden_dim).to(device),
+                  torch.zeros(n_layers, BATCH_SIZE, self.hidden_dim).to(device))
 
 
-#model = LSTM(INPUT_DIM, EMBEDDING_DIM, HIDDEN_DIM)
+#model = LSTM(INPUT_DIM, EMBEDDING_DIM, HIDDEN_DIM, N_LAYERS, BIDIRECTIONAL)
 #model.embedding.weight.data.copy_(TEXT.vocab.vectors)
 #optimizer = optim.SGD(model.parameters(), lr=0.02)
 ## optimizer = optim.Adam(model.parameters(), lr=0.01)
