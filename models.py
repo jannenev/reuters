@@ -414,10 +414,7 @@ class LSTM_CNN(nn.Module):
             return (torch.zeros(1, batch_size, self.hidden_dim).to(self.device),
                   torch.zeros(1, batch_size, self.hidden_dim).to(self.device))
 
-# N_FILTERS = 200
-# FILTER_SIZES = [3,5,6]
-# model = models.LSTM_CNN(INPUT_DIM, EMBEDDING_DIM, N_FILTERS, FILTER_SIZES, OUTPUT_DIM, HIDDEN_DIM, device)
-# model.hidden = model.init_hidden(64)
+
 
 class CNN_LSTM(nn.Module):
     def __init__(self, vocab_size, embedding_dim, n_filters, filter_sizes, output_dim, hidden_dim, device):
@@ -426,8 +423,8 @@ class CNN_LSTM(nn.Module):
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.convs = nn.ModuleList([nn.Conv2d(in_channels=1, out_channels=n_filters, kernel_size=(fs,embedding_dim)) for fs in filter_sizes])
         self.fc = nn.Linear(len(filter_sizes)*n_filters, output_dim)
-        self.lstm = nn.LSTM(n_filters*len(filter_sizes), HIDDEN_DIM)
-        self.fc2 = nn.Linear(HIDDEN_DIM, output_dim)
+        self.lstm = nn.LSTM(n_filters*len(filter_sizes), hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, output_dim)
         self.hidden_dim = hidden_dim
         self.device=device
         
