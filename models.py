@@ -419,3 +419,29 @@ class LSTM_CNN(nn.Module):
 # model = models.LSTM_CNN(INPUT_DIM, EMBEDDING_DIM, N_FILTERS, FILTER_SIZES, OUTPUT_DIM, HIDDEN_DIM, device)
 # model.hidden = model.init_hidden(64)
 
+class CNN_LSTM(nn.Module):
+    def __init__(self, vocab_size, embedding_dim, n_filters, filter_sizes, output_dim, hidden_dim, device):
+        super().__init__()
+        
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.convs = nn.ModuleList([nn.Conv2d(in_channels=1, out_channels=n_filters, kernel_size=(fs,embedding_dim)) for fs in filter_sizes])
+        self.fc = nn.Linear(len(filter_sizes)*n_filters, output_dim)
+        self.lstm = nn.LSTM(n_filters*len(filter_sizes), HIDDEN_DIM)
+        self.fc2 = nn.Linear(HIDDEN_DIM, output_dim)
+        self.hidden_dim = hidden_dim
+        self.device=device
+        
+    def forward(self, x):
+        x = x.permute(1, 0)        
+        embedded = self.embedding(x)
+        embedded = embedded.unsqueeze(1)        
+        conved = [F.relu(conv(embedded)).squeeze(3) for conv in self.convs]            
+        pooled = [F.max_pool1d(conv, conv.shape[2]).squeeze(2) for conv in conved]           
+        cat = torch.cat(pooled, dim=1)
+        x, (h, c) = self.lstm(cat.unsqueeze(0), self.hidden)
+        return torch.sigmoid(self.fc2(x[-1]))
+      
+    def init_hidden(self, batch_size):
+            return (torch.zeros(1, batch_size, self.hidden_dim).to(self.device),
+                  torch.zeros(1, batch_size, self.hidden_dim).to(self.device))
+
