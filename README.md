@@ -14,7 +14,7 @@ The code produces large files, especilly reuters_all.pkl of 435,8 MB, and its sp
 3426 samples.
 
 
-On small data (3426 samples) CNN  based models converge robustly very fast, on couple epochs, while LSTM based models  took a long time, a bit over 50 epochs to start showing any sign convergence. On small data CNN was already reached its point of overfitting, before LSTM started to converge.  The small data was not enough for LSTM. Possibly because with 126 classes, the number of some individual classes remains small. (we did not balance the training set, but used random sample ). The same was true for the LSTM+CNN architecture.
+Even on small data CNN  based models converge robustly very fast, on couple epochs, while LSTM based models  took a long time, a bit over 50 epochs to start showing any sign convergence. On small data CNN was already reached its point of overfitting, before LSTM started to converge.  The small data was not enough for LSTM. Possibly because with 126 classes, the number of some individual classes remains small. (we did not balance the training set, but used random sample ). The same was true for the LSTM+CNN architecture.
 
 Training time on GTX 1070 GPU / 8GB.
 
