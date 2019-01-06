@@ -200,26 +200,12 @@ class CNN2(nn.Module):
         self.dropout = nn.Dropout(dropout)
         
     def forward(self, x):
-        #x = [sent len, batch size]
-        
         x = x.permute(1, 0)        
-        #x = [batch size, sent len]
-        
         embedded = self.embedding(x)
-        #embedded = [batch size, sent len, emb dim]
-        
         embedded = embedded.unsqueeze(1)        
-        #embedded = [batch size, 1, sent len, emb dim]
-        
         conved = [F.relu(conv(embedded)).squeeze(3) for conv in self.convs]            
-        #conv_n = [batch size, n_filters, sent len - filter_sizes[n]]
-        
         pooled = [F.max_pool1d(conv, conv.shape[2]).squeeze(2) for conv in conved]        
-        #pooled_n = [batch size, n_filters]
-        
-        cat = self.dropout(torch.cat(pooled, dim=1))
-        #cat = [batch size, n_filters * len(filter_sizes)]
-            
+        cat = self.dropout(torch.cat(pooled, dim=1))    
         return F.sigmoid(self.fc(cat))
 
     
@@ -238,31 +224,6 @@ class CNN2(nn.Module):
 
 # Simple model
 import torch.nn as nn
-
-class RNNSimple(nn.Module):
-    def __init__(self, input_dim, embedding_dim, hidden_dim, output_dim):
-        super().__init__()
-        
-        self.embedding = nn.Embedding(input_dim, embedding_dim)
-        self.rnn = nn.RNN(embedding_dim, hidden_dim)
-        self.fc = nn.Linear(hidden_dim, output_dim)
-        
-    def forward(self, x):
-
-        #x = [sent len, batch size]
-        
-        embedded = self.embedding(x)
-        
-        #embedded = [sent len, batch size, emb dim]
-        
-        output, hidden = self.rnn(embedded)
-        
-        #output = [sent len, batch size, hid dim]
-        #hidden = [1, batch size, hid dim]
-        
-        assert torch.equal(output[-1,:,:], hidden.squeeze(0))
-        
-        return self.fc(hidden.squeeze(0))
 
 #HIDDEN_DIM = 256
 #OUTPUT_DIM = 126
